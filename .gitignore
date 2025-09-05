@@ -1,0 +1,35 @@
+# Build
+bin/
+obj/
+**/bin/
+**/obj/
+*.exe
+*.dll
+*.pdb
+
+# VS / IDE
+.vs/
+*.user
+*.suo
+*.userprefs
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test
+TestResults/
+*.trx
+
+# Secrets / settings locales
+appsettings.Development.json
+appsettings.Local.json
+*.Secrets.json
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json

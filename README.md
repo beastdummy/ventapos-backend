@@ -34,3 +34,11 @@ Swagger: http://localhost:5000/swagger
 - Auditoría de triggers se alimenta con variables `@app_user_id` y `@app_request_id`; se seteán automáticamente en cada endpoint mediante `AuditoriaHelper.PrepararAsync(...)`.
 - Para **ventas**, el endpoint calcula totales y registra movimientos de inventario (tipo `VENTA`) por cada línea.
 - Para **compras**, se recalculan totales y se aplican entradas a inventario (tipo `COMPRA`) con actualización de `stock_cache`.
+
+
+POST /auth/login
+
+{ "email": "admin@ventapos.local", "password": "Admin#2025!" }
+
+
+Copia token → botón Authorize → pega solo el token → Authorize.

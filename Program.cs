@@ -5,7 +5,8 @@ using System.Text;
 using Ventapos.Api.Auth;
 using Ventapos.Api.Data;
 using Ventapos.Api.Features;
-
+using Microsoft.OpenApi.Models;
+using Dapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,32 @@ builder.Services.AddSingleton(new Db(connStr));
 builder.Services.AddSingleton<JwtService>();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ventapos.Api", Version = "v1" });
+
+    var jwtSecurityScheme = new OpenApiSecurityScheme
+    {
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Description = "Introduce **solo** el token JWT (sin 'Bearer ').",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = JwtBearerDefaults.AuthenticationScheme
+        }
+    };
+
+    c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+    // Requisito global: todas las operaciones aceptan este esquema
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+});
 
 // CORS (ajusta orígenes según frontend)
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
@@ -70,5 +96,22 @@ app.MapComprobantes();
 app.MapOutbox();
 app.MapPricing();
 app.MapUsersAdmin();
+
+app.MapGet("/health/db", async (Db db) =>
+{
+    try
+    {
+        using var conn = await db.OpenAsync();
+        var version = await conn.ExecuteScalarAsync<string>("SELECT VERSION()");
+        return Results.Ok(new { ok = true, version });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
+})
+.WithTags("Health")
+.AllowAnonymous();
+
 
 app.Run();
